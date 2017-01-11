@@ -93,3 +93,5 @@ ENV/
 ### IPythonNotebook ###
 # Temporary data
 .ipynb_checkpoints/
+
+DQN/MNIST_data/
