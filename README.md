@@ -1,9 +1,10 @@
 ### Overview
 
-This repository provides code, exercises and solutions for popular Reinforcement Learning algorithms. These are meant to serve as a learning tool to complement the theoretical materials from
+This repository provides code, exercises and solutions for popular Deep Reinforcement Learning algorithms. These are meant to serve as a learning tool to complement the theoretical materials from
 
 - [Reinforcement Learning: An Introduction (2nd Edition)](https://webdocs.cs.ualberta.ca/~sutton/book/bookdraft2016sep.pdf)
 - [David Silver's Reinforcement Learning Course](http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html)
+- [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/)
 
 Each folder in corresponds to one or more chapters of the above textbook and/or course. In addition to exercises and solution, each folder also contains a list of learning goals, a brief concept summary, and links to the relevant readings.
 
@@ -14,7 +15,7 @@ All code is written in Python 3 and uses RL environments from [OpenAI Gym](https
 
 - [Introduction to RL problems & OpenAI Gym](Introduction/)
 - [MDPs and Bellman Equations](MDP/)
-- [Dynamic Programming: Model-Based RL, Policy Iteration and Value Iteration](DP/)
+- [Dynamic Programming: Model-Based RL, Policy Iteration and Value Iteration](Dynamic Programming/)
 - [Monte Carlo Model-Free Prediction & Control](MC/)
 - [Temporal Difference Model-Free Prediction & Control](TD/)
 - [Function Approximation](FA/)
@@ -22,13 +23,14 @@ All code is written in Python 3 and uses RL environments from [OpenAI Gym](https
 - [Policy Gradient Methods](PolicyGradient/) (WIP)
 - Learning and Planning (WIP)
 - Exploration and Exploitation (WIP)
+- [Feedforward Nerual Network with Stochastic Gradient Descent](Stochastic Gradient Descent/)
 
 
 ### List of Implemented Algorithms
 
-- [Dynamic Programming Policy Evaluation](DP/Policy Evaluation Solution.ipynb)
-- [Dynamic Programming Policy Iteration](DP/Policy Iteration Solution.ipynb)
-- [Dynamic Programming Value Iteration](DP/Value Iteration Solution.ipynb)
+- [Dynamic Programming Policy Evaluation](Dynamic Programming/Policy Evaluation Solution.ipynb)
+- [Dynamic Programming Policy Iteration](Dynamic Programming/Policy Iteration Solution.ipynb)
+- [Dynamic Programming Value Iteration](Dynamic Programming/Value Iteration Solution.ipynb)
 - [Monte Carlo Prediction](MC/MC Prediction Solution.ipynb)
 - [Monte Carlo Control with Epsilon-Greedy Policies](MC/MC Control with Epsilon-Greedy Policies Solution.ipynb)
 - [Monte Carlo Off-Policy Control with Importance Sampling](MC/Off-Policy MC Control with Weighted Importance Sampling Solution.ipynb)
