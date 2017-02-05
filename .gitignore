@@ -96,3 +96,4 @@ ENV/
 
 MNIST_data/
 logs/
+data/
