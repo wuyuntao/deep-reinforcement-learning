@@ -4,27 +4,30 @@
 from datetime import datetime
 import gym
 from gym import wrappers
+import numpy as np
 
+GAME = 'Pong-v0'
 timestamp = datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-REPLAY = 'data/cartpole-v0-experiment-{}'.format(timestamp)
+REPLAY = 'data/{}/experiment-{}'.format(GAME, timestamp)
 
-env = gym.make('CartPole-v0')
+env = gym.make(GAME)
 env = wrappers.Monitor(env, REPLAY)
 
+print('env', GAME)
 print('action', env.action_space)
 print('observation', env.observation_space)
-print('observation high', env.observation_space.high)
-print('observation low', env.observation_space.low)
+# print('observation high', env.observation_space.high)
+# print('observation low', env.observation_space.low)
 
 env.reset()
 done = False
 while not done:
     action = env.action_space.sample()
     observation, reward, done, info = env.step(action)
-    print('observation', observation)
-    print('reward', reward)
-    print('done', done)
-    print('info', info)
+    # print('observation', observation)
+    # print('reward', reward)
+    # print('done', done)
+    # print('info', info)
     env.render()
 
 # Upload replay to openai
