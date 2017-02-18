@@ -8,17 +8,30 @@ import numpy as np
 import random
 import tensorflow as tf
 
-tf.app.flags.DEFINE_integer('training_episodes', 10)
-tf.app.flags.DEFINE_boolean('enable_env_monitor', False)
-tf.app.flags.DEFINE_integer('minibatch_size', 32)
-tf.app.flags.DEFINE_integer('replay_memory_capacity', 1000000)
-tf.app.flags.DEFINE_integer('target_network_update_freq', 10000)
-tf.app.flags.DEFINE_float('discount_factor', 0.99)
-tf.app.flags.DEFINE_float('learning_rate', 0.00025)
-tf.app.flags.DEFINE_float('gradient_momentum', 0.95)
-tf.app.flags.DEFINE_float('initial_exploration', 1)
-tf.app.flags.DEFINE_float('final_exploration', 0.1)
-tf.app.flags.DEFINE_integer('final_exploration_frame', 1000000)
+tf.app.flags.DEFINE_string('env_name', "AirRaid-v0",
+                           "env_name")
+tf.app.flags.DEFINE_integer('training_episodes', 10,
+                            "training_episodes")
+tf.app.flags.DEFINE_boolean('enable_env_monitor', False,
+                            "enable_env_monitor")
+tf.app.flags.DEFINE_integer('minibatch_size', 32,
+                            "minibatch_size")
+tf.app.flags.DEFINE_integer('replay_memory_capacity', 1000000,
+                            "replay_memory_capacity")
+tf.app.flags.DEFINE_integer('target_network_update_freq', 10000,
+                            "target_network_update_freq")
+tf.app.flags.DEFINE_float('discount_factor', 0.99,
+                          "discount_factor")
+tf.app.flags.DEFINE_float('learning_rate', 0.00025,
+                          "learning_rate")
+tf.app.flags.DEFINE_float('gradient_momentum', 0.95,
+                          "gradient_momentum")
+tf.app.flags.DEFINE_float('initial_exploration', 1,
+                          "initial_exploration")
+tf.app.flags.DEFINE_float('final_exploration', 0.1,
+                          "final_exploration")
+tf.app.flags.DEFINE_integer('final_exploration_frame', 1000000,
+                            "final_exploration_frame")
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -150,10 +163,10 @@ def main(_):
     # Initialize tensorflow session
     session = tf.Session()
     # Initialize gym enviroment
-    env = gym.make('CartPole-v0')
+    env = gym.make(FLAGS.env_name)
     if FLAGS.enable_env_monitor:
         timestamp = datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-        replay_name = 'data/cartpole-v0-experiment-{}'.format(timestamp)
+        replay_name = 'data/{}-experiment-{}'.format(FLAGS.env_name, timestamp)
         env = wrappers.Monitor(env, replay_name)
     # Initialize replay memory
     memory = ReplayMemory(FLAGS.replay_memory_capacity)
