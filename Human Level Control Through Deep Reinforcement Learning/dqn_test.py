@@ -215,6 +215,7 @@ def main(_):
     for epoch in range(FLAGS.training_episodes):
         # Initialize sequence s1
         observation = env.reset()
+        score = 0.0
         done = False
         # For t = 1, T
         episode_step = 1
@@ -227,8 +228,14 @@ def main(_):
             # otherwise select the action with best promise
             else:
                 action = q.get_best_action(observation)
+            # Add penalty for lost live
+            last_lives = env.ale.lives()
             # Execute selected action and observe reward and image
             next_observation, reward, done, info = env.step(action)
+            if reward > 0:
+                score += reward
+            if env.ale.lives() < last_lives:
+                reward -= 100
             # Store transition in memory
             memory.add(observation, action, next_observation, reward, done)
             # Sample random minibatch of transitions from memory
@@ -239,8 +246,9 @@ def main(_):
             if train_step % FLAGS.target_network_update_freq == 0:
                 q.update_target_params()
             # Print training status
-            print('Episode {}, Step {}, Done {}, Reward {}, Memory {}'
-                  .format(epoch, episode_step, done, reward, memory.size))
+            print('Episode {}, Step {}/{}, Done {}, Reward {}/{}, Memory {}'
+                  .format(epoch, episode_step, train_step, done, reward, score,
+                          memory.size))
             observation = next_observation
             episode_step += 1
             train_step += 1
