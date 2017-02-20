@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from datetime import datetime
 import gym
 from gym import wrappers
@@ -8,9 +12,9 @@ import numpy as np
 import random
 import tensorflow as tf
 
-tf.app.flags.DEFINE_string('env_name', "AirRaid-v0",
+tf.app.flags.DEFINE_string('env_name', "Breakout-v0",
                            "env_name")
-tf.app.flags.DEFINE_integer('training_episodes', 10,
+tf.app.flags.DEFINE_integer('training_episodes', 200,
                             "training_episodes")
 tf.app.flags.DEFINE_boolean('enable_env_monitor', False,
                             "enable_env_monitor")
@@ -56,7 +60,14 @@ class ReplayMemory(object):
             self._steps.pop(0)
 
     def get_batch(self, minibatch_size):
+        if len(self._steps) < minibatch_size:
+            return None
+
         return random.sample(self._steps, minibatch_size)
+
+    @property
+    def size(self):
+        return len(self._steps)
 
 
 class ReplayStep(object):
@@ -77,41 +88,65 @@ class DQN(object):
 
         with tf.variable_scope('input0'):
             self._input0 = tf.placeholder(
-                tf.float32, [-1, 84, 84, 3], name="input_layer")
+                tf.float32, (None, 210, 160, 3), name="input_layer")
 
         with tf.variable_scope('conv1'):
             self._conv1 = tf.contrib.layers.conv2d(
-                self._inputs, 32,
-                kernel_size=[8, 8], stride=[4, 4], padding="VALID",
-                activation_fn=tf.nn.relu, name="conv_layer_1")
+                self._input0,
+                num_outputs=32,
+                kernel_size=[8, 8],
+                stride=[4, 4],
+                padding="VALID",
+                weights_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                biases_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                activation_fn=tf.nn.relu)
 
         with tf.variable_scope('conv2'):
             self._conv2 = tf.contrib.layers.conv2d(
-                self._conv1, 64,
-                kernel_size=[4, 4], stride=[2, 2], padding="VALID",
-                activation_fn=tf.nn.relu, name="conv_layer_2")
+                self._conv1,
+                num_outputs=64,
+                kernel_size=[4, 4],
+                stride=[2, 2],
+                padding="VALID",
+                weights_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                biases_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                activation_fn=tf.nn.relu)
 
         with tf.variable_scope('conv3'):
             self._conv3 = tf.contrib.layers.conv2d(
-                self._conv2, 64,
-                kernel_size=[3, 3], stride=[1, 1], padding="VALID",
-                activation_fn=tf.nn.relu, name="conv_layer_3")
-            self._conv3_flat = tf.reshape(self._conv3, [-1, 3 * 3 * 64])
+                self._conv2,
+                num_outputs=64,
+                kernel_size=[3, 3],
+                stride=[1, 1],
+                padding="VALID",
+                weights_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                biases_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                activation_fn=tf.nn.relu)
+            self._conv3_flat = tf.reshape(self._conv3, [-1, 22528])
 
         with tf.variable_scope('dense4'):
             self._dense4 = tf.contrib.layers.fully_connected(
-                self._conv3_flat, 512,
-                activation_fn=tf.nn.relu, name="dense_layer_4")
+                self._conv3_flat,
+                num_outputs=512,
+                weights_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                biases_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                activation_fn=tf.nn.relu)
 
         with tf.variable_scope('dense5'):
             self._dense5 = tf.contrib.layers.fully_connected(
-                self._dense4, 512,
-                activation_fn=tf.nn.relu, name="dense_layer_5")
+                self._dense4,
+                num_outputs=512,
+                weights_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                biases_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                activation_fn=tf.nn.relu)
 
         with tf.variable_scope('output6'):
             self._q = tf.contrib.layers.fully_connected(
-                self._dense5, self._env.action_space.n,
-                activation_fn=tf.nn.sigmoid, name="q_output")
+                self._dense5,
+                num_outputs=self._env.action_space.n,
+                weights_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                biases_initializer=tf.random_uniform_initializer(-1.0, 1.0),
+                activation_fn=tf.nn.sigmoid)
             self._q_action = tf.argmax(self._q, 1, name="q_action")
             self._q_max = tf.reduce_max(self._q, name="q_max")
 
@@ -128,6 +163,8 @@ class DQN(object):
                 momentum=FLAGS.gradient_momentum,
                 epsilon=0.01).minimize(self._loss)
 
+        session.run(tf.global_variables_initializer())
+
     def get_best_action(self, observation):
         action = self._session.run([self._q_action], {
             self._input0: self._preprocess_observation(observation)
@@ -143,8 +180,8 @@ class DQN(object):
                         step.next_observation)
                     })
                 q += FLAGS.discount_factor * next_q_max
-            q_target = np.zeros(self._env.action_space.n, np.float32)
-            q_target[step.action] = q
+            q_target = np.zeros([1, self._env.action_space.n], np.float32)
+            q_target[0, step.action] = q
 
             self._session.run(self._optimizer, {
                 self._input0: self._preprocess_observation(
@@ -156,10 +193,11 @@ class DQN(object):
         pass
 
     def _preprocess_observation(self, observation):
-        return observation
+        return (observation,)
 
 
 def main(_):
+    tf.set_random_seed(1)
     # Initialize tensorflow session
     session = tf.Session()
     # Initialize gym enviroment
@@ -171,7 +209,7 @@ def main(_):
     # Initialize replay memory
     memory = ReplayMemory(FLAGS.replay_memory_capacity)
     # Initialize action-value function Q
-    q = DQN(session)
+    q = DQN(env, session)
     train_step = 1
     # For episode = 1, M do
     for epoch in range(FLAGS.training_episodes):
@@ -196,12 +234,13 @@ def main(_):
             # Sample random minibatch of transitions from memory
             minibatch = memory.get_batch(FLAGS.minibatch_size)
             # Perform a SGD step with respect to the network parameter
-            q.train(minibatch)
+            if minibatch is not None:
+                q.train(minibatch)
             if train_step % FLAGS.target_network_update_freq == 0:
                 q.update_target_params()
             # Print training status
-            print('Episode {}, Step {}, Done {}'
-                  .format(epoch, episode_step, done))
+            print('Episode {}, Step {}, Done {}, Reward {}, Memory {}'
+                  .format(epoch, episode_step, done, reward, memory.size))
             observation = next_observation
             episode_step += 1
             train_step += 1
